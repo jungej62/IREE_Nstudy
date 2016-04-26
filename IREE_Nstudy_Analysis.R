@@ -23,8 +23,34 @@ tlidat13_mod2<-lme(seedyld~Nfert+I(Nfert^2), random=~1|location/rep, data=tlidat
 anova(tlidat13_mod2)
 sem.model.fits(tlidat13_mod2)
 
+#Analyzing grain yield by location
+cromod<-lme(seedyld~Nfert,#+I(Nfert^2),
+            random=~1|rep, data=subset(tlidat13, location=="Cro"), na.action=na.omit)
+anova(cromod)
+sem.model.fits(cromod)
+
+Lammod<-lme(seedyld~Nfert+I(Nfert^2),
+            random=~1|rep, data=subset(tlidat13, location=="Lam"), na.action=na.omit)
+anova(Lammod)
+sem.model.fits(Lammod)
+
+Wasmod<-lme(seedyld~Nfert+I(Nfert^2),
+            random=~1|rep, data=subset(tlidat13, location=="Was"), na.action=na.omit)
+anova(Wasmod)
+sem.model.fits(Wasmod)
+
+Mormod<-lme(seedyld~Nfert+I(Nfert^2),
+            random=~1|rep, data=subset(tlidat13, location=="Mor"), na.action=na.omit)
+anova(Mormod)
+sem.model.fits(Mormod)
+
+Rosmod<-lme(seedyld~Nfert+I(Nfert^2),
+            random=~1|rep, data=subset(tlidat13, location=="Ros"), na.action=na.omit)
+anova(Rosmod)
+sem.model.fits(Rosmod)
+
 #looking at aonr for seed yield 2013 data
-aonr.out(tlidat13_mod2, tlidat13, 20)
+aonr.out(tlidat13_mod2, tlidat13, 20, 0.25)
 
 #Re-arranged version of quadratic to ID the peak. However, doesn't include random effects.
 tlidat13_qmod<-nls(seedyld ~ alpha - ((2*gamma*beta)*Nfert)+(beta*Nfert^2), data=tlidat13, 
@@ -35,8 +61,6 @@ AIC(tlidat13_qmod)
 
 #The quadratic with random effects has a lower AIC value than the model without random effects,
 #so we should use the random model and bootstrap it to ID variation around max.
-
-
 
 #Data frame to determine range for starting values. 
 gstart <- data.frame(alpha = c(-100, 10000), beta = c(-10000, 1000), gamma=c(-500,500))
