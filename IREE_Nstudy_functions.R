@@ -45,3 +45,4 @@ linplat<-function(x, alpha, beta, gamma){
   ifelse(x < gamma, alpha + beta*x, 
          alpha+beta*gamma)
 }
+

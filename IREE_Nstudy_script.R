@@ -86,3 +86,9 @@ ggplot(tlidat13, aes(x=Nfert, y=seedyld, color=location))+
         axis.text.y=element_text(size=10, color='black'),
         panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 ggsave("GrainAllLocs2013.pdf", width=9, height=7, units="in", path="/Users/junge037/Documents/Projects/IREE-IWG/Data-2015/FinalAnalysis/Nstudy_Writeup/Figures") 
+
+#Simple plots to show data by location
+plot(seedyld ~ Nfert, pch = 16,
+xlab = expression(paste("Nitrogen rate [kg ha" ^-1,"]")),
+ylab = expression(paste("Grain yield [kg ha"^-1,"]")),
+data=subset(tlidat15, location=="Cro"))
