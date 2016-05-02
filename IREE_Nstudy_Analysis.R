@@ -1,168 +1,129 @@
-sumdat<-summarySE(dat, measurevar="seedyld", groupvars=c("fyear", "location", "var", "Nfert"), na.rm=T)
-seed_dat<-subset(dat, fyear!="2012"&var!="switch")
-mod1<-lme(seedyld~var*Nfert*Age, random=~1|fyear/location/rep, data=seed_dat, na.action=na.omit)
+#Statistical models for IREE_Nstudy. This will be for grain only!
+#First, we have to separate the northern sites and the southern sites.
+#We have to omit the 2012 data from the southern sites. One idea is to subset the 0N plots and analyze 
+#stand declines in these plots only. Doing this in the south would provide 4 years of decline data.
+
+datn<-droplevels(subset(dat, region=="North"))
+dats<-droplevels(subset(dat, region=="South"))
+
+#Analyzing grain yields in south first.
+seed_dats<-subset(dats, var!="switch")
+mod1<-lme(seedyld~var*Nfert2*Age, random=~1|fyear/location/rep, data=seed_dats, na.action=na.omit)
 anova(mod1)
 #Grain yields differed by variety. Changes in grain yield through time and in
 #response to N fert were unique for each variety. So seperate and analyze independently
 
 #Subsetting data to analyze TLI variety only
-tlidat<-subset(dat, fyear!="2012"&var=="TLI")
-tlidat_mod1<-lme(seedyld~Nfert*Age, random=~1|fyear/location/rep, data=tlidat, na.action=na.omit)
+tlidats<-subset(dats, var=="TLI")
+tlidats_mod1<-lme(seedyld~Nfert2*Age, random=~1|fyear/location/rep, data=tlidats, na.action=na.omit)
 anova(tlidat_mod1)
-
 #There is a Nfert/age interaction, so maybe we should fit Nfert for each year seperetly.
-#Start with subsetting for 2013
-tlidat13<-subset(dat, fyear=="2013"&var=="TLI")
+#Start with subsetting for year 2 (2013)
+tlidatsy2<-subset(tlidats, Age=="2"&var=="TLI")
 
-tlidat13_mod1<-lme(seedyld~Nfert, random=~1|location/rep, data=tlidat13, na.action=na.omit)
-anova(tlidat13_mod1)
-sem.model.fits(tlidat13_mod1)
+tlidatsy2_mod1<-lme(seedyld~Nfert2, random=~1|location/rep, data=tlidatsy2, na.action=na.omit)
+anova(tlidatsy2_mod1)
+sem.model.fits(tlidatsy2_mod1)
 
 #quadratic
-tlidat13_mod2<-lme(seedyld~Nfert+I(Nfert^2), random=~1|location/rep, data=tlidat13, na.action=na.omit)
-anova(tlidat13_mod2)
-sem.model.fits(tlidat13_mod2)
+tlidatsy2_mod2<-lme(seedyld~Nfert2+I(Nfert2^2), random=~1|location/rep, data=tlidatsy2, na.action=na.omit)
+anova(tlidatsy2_mod2)
+sem.model.fits(tlidatsy2_mod2)
 
-#Analyzing grain yield by location
+#Another approach is to see if grain yields at moderate N rates
+#were different from 0 N rate by changing N to factor and using
+#means comparisons
+tlidatsy2_mod3<-lme(seedyld~factor(Nfert2), random=~1|location/rep, data=tlidatsy2, na.action=na.omit)
+summary(tlidatsy2_mod3)
+
+#Analyzing grain yield by location 
+######South
+##Year 1 (2012)
+#Calculating mean grain yields in control plots
+summarySE(subset(tlidats, Nfert2=="0"), measurevar="seedyld", 
+          groupvars=c("Age", "location"), na.rm=T)
+
+##South
+######Year 2 (2013)
+
+Lammod<-lme(seedyld~Nfert2+I(Nfert2^2),
+            random=~1|rep, data=subset(tlidatsy2, location=="Lam"), na.action=na.omit)
+anova(Lammod)
+sem.model.fits(Lammod)
+aonr.out(Lammod, subset(tlidatsy2, location=="Lam"), 100)
+
+
+Wasmod<-lme(seedyld~Nfert2+I(Nfert2^2),
+            random=~1|rep, data=subset(tlidatsy2, location=="Was"), na.action=na.omit)
+anova(Wasmod)
+sem.model.fits(Wasmod)
+
+Mormod<-lme(seedyld~Nfert2+I(Nfert2^2),
+            random=~1|rep, data=subset(tlidatsy2, location=="Mor"), na.action=na.omit)
+anova(Mormod)
+sem.model.fits(Mormod)
+
+
+###South
+### Year 3 (2014)
+tlidatsy3<-subset(tlidats, Age=="3"&var=="TLI")
+
+tlidat14_mod0<-lme(seedyld~Nfert2*location, random=~1|rep, data=tlidatsy3, na.action=na.omit)
+anova(tlidat14_mod0)
+sem.model.fits(tlidat14_mod0)
+
+tlidat14_mod01<-lme(seedyld~Nfert2*location+I(Nfert2^2)*location, random=~1|rep, data=tlidatsy3, na.action=na.omit)
+anova(tlidat14_mod01)
+sem.model.fits(tlidat14_mod01)
+
+tlidat14_mod1<-lme(seedyld~Nfert2, random=~1|location/rep, data=tlidatsy3, na.action=na.omit)
+anova(tlidat14_mod1)
+sem.model.fits(tlidat14_mod1)
+
+#quadratic
+tlidat14_mod2<-lme(seedyld~Nfert2+I(Nfert2^2), random=~1|location/rep, data=tlidatsy3, na.action=na.omit)
+anova(tlidat14_mod2)
+sem.model.fits(tlidat14_mod2)
+
+#######NO EFFECT OF N FERTILIZER IN YEAR 3
+
+########################### Year 4    2015      ###########
+
+tlidatsy4<-subset(dats, fyear=="2015"&var=="TLI")
+
+tlidat15_mod0<-lme(seedyld~Nfert2*location, random=~1|rep, data=tlidatsy4, na.action=na.omit)
+anova(tlidat15_mod0)
+sem.model.fits(tlidat15_mod0)
+
+tlidat15_mod01<-lme(seedyld~Nfert2*location+I(Nfert2^2)*location, random=~1|rep, data=tlidatsy4, na.action=na.omit)
+anova(tlidat15_mod01)
+sem.model.fits(tlidat15_mod01)
+
+#quadratic
+tlidat15_mod2<-lme(seedyld~Nfert2+I(Nfert2^2), random=~1|location/rep, data=tlidatsy4, na.action=na.omit)
+anova(tlidat15_mod2)
+sem.model.fits(tlidat15_mod2)
+
+
+################################################## North
+tlidatn<-subset(datn, var=="TLI")
+
+########## Year 1
+
 cromod<-lme(seedyld~Nfert,#+I(Nfert^2),
             random=~1|rep, data=subset(tlidat13, location=="Cro"), na.action=na.omit)
 anova(cromod)
 sem.model.fits(cromod)
-
-Lammod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat13, location=="Lam"), na.action=na.omit)
-anova(Lammod)
-sem.model.fits(Lammod)
-
-Wasmod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat13, location=="Was"), na.action=na.omit)
-anova(Wasmod)
-sem.model.fits(Wasmod)
-
-Mormod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat13, location=="Mor"), na.action=na.omit)
-anova(Mormod)
-sem.model.fits(Mormod)
 
 Rosmod<-lme(seedyld~Nfert+I(Nfert^2),
             random=~1|rep, data=subset(tlidat13, location=="Ros"), na.action=na.omit)
 anova(Rosmod)
 sem.model.fits(Rosmod)
 
-###########################     2014      ###########
-
-tlidat14<-subset(dat, fyear=="2014"&var=="TLI")
-
-tlidat14_mod0<-lme(seedyld~Nfert*location, random=~1|rep, data=tlidat14, na.action=na.omit)
-anova(tlidat14_mod0)
-sem.model.fits(tlidat14_mod0)
-
-tlidat14_mod01<-lme(seedyld~Nfert*location+I(Nfert^2)*location, random=~1|rep, data=tlidat14, na.action=na.omit)
-anova(tlidat14_mod01)
-sem.model.fits(tlidat14_mod01)
-
-tlidat14_mod1<-lme(seedyld~Nfert, random=~1|location/rep, data=tlidat14, na.action=na.omit)
-anova(tlidat14_mod1)
-sem.model.fits(tlidat14_mod1)
-
-#quadratic
-tlidat14_mod2<-lme(seedyld~Nfert+I(Nfert^2), random=~1|location/rep, data=tlidat14, na.action=na.omit)
-anova(tlidat14_mod2)
-sem.model.fits(tlidat14_mod2)
-
-#Analyzing grain yield by location
-#Crookston
-cromod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat14, location=="Cro"), na.action=na.omit)
-anova(cromod)
-sem.model.fits(cromod)
-
-#Looking at quadratic plateau for this location
-gstart <- data.frame(alpha = c(0,1000), beta = c(-100, 100), gamma=c(-50,50))
-Cro14_qpmod<-nls2(seedyld ~ qpmod(Nfert, alpha, beta, gamma), data=subset(tlidat14, location=="Cro"), 
-                     start = gstart, algorithm = "brute-force",
-                     control = list(maxiter=10000), na.action=na.omit)
-
-#Doesn't work. Now trying linear plateau model
-Cro14_lpmod<-nls2(seedyld ~ linplat(Nfert, alpha, beta, gamma), data=subset(tlidat14, location=="Cro"), 
-                  start = gstart, algorithm = "brute-force",
-                  control = list(maxiter=10000), na.action=na.omit)
-
-Cro14_lpmod<-nls(seedyld ~ linplat(Nfert, alpha, beta, gamma), data=subset(tlidat14, location=="Cro"),
-                 start = list(alpha = 900,beta = 100, gamma = 50),  na.action=na.omit)
-
-#Lamberton
-Lammod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat14, location=="Lam"), na.action=na.omit)
-anova(Lammod)
-sem.model.fits(Lammod)
-
-#Waseca
-Wasmod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat14, location=="Was"), na.action=na.omit)
-anova(Wasmod)
-sem.model.fits(Wasmod)
-
-#Roseau
-Rosmod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat14, location=="Ros"), na.action=na.omit)
-anova(Rosmod)
-sem.model.fits(Rosmod)
 
 
-###########################     2015      ###########
 
-tlidat15<-subset(dat, fyear=="2015"&var=="TLI")
 
-tlidat15_mod0<-lme(seedyld~Nfert*location, random=~1|rep, data=tlidat15, na.action=na.omit)
-anova(tlidat15_mod0)
-sem.model.fits(tlidat15_mod0)
-
-tlidat15_mod01<-lme(seedyld~Nfert*location+I(Nfert^2)*location, random=~1|rep, data=tlidat15, na.action=na.omit)
-anova(tlidat15_mod01)
-sem.model.fits(tlidat15_mod01)
-
-tlidat15_mod1<-lme(seedyld~Nfert, random=~1|location/rep, data=tlidat15, na.action=na.omit)
-anova(tlidat15_mod1)
-sem.model.fits(tlidat15_mod1)
-
-#quadratic
-tlidat15_mod2<-lme(seedyld~Nfert+I(Nfert^2), random=~1|location/rep, data=tlidat15, na.action=na.omit)
-anova(tlidat15_mod2)
-sem.model.fits(tlidat15_mod2)
-
-#Analyzing grain yield by location
-#Crookston
-cromod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat15, location=="Cro"), na.action=na.omit)
-anova(cromod)
-sem.model.fits(cromod)
-
-#Lamberton
-Lammod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat15, location=="Lam"), na.action=na.omit)
-anova(Lammod)
-sem.model.fits(Lammod)
-
-#Waseca
-Wasmod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat15, location=="Was"), na.action=na.omit)
-anova(Wasmod)
-sem.model.fits(Wasmod)
-
-#Morris
-Mormod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat15, location=="Mor"), na.action=na.omit)
-anova(Mormod)
-sem.model.fits(Mormod)
-
-#Roseau
-Rosmod<-lme(seedyld~Nfert+I(Nfert^2),
-            random=~1|rep, data=subset(tlidat15, location=="Ros"), na.action=na.omit)
-anova(Rosmod)
-sem.model.fits(Rosmod)
-
-##################################################
 
 #looking at aonr for seed yield 2013 data
 aonr.out(tlidat13_mod2, tlidat13, 20, 0.25)

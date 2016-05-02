@@ -25,7 +25,7 @@ aonr.out<-function(mod, yldat, simnum){ #mod is model, yldat is the name of data
     b1<-fixef(modtmp)[2]
     b2<-fixef(modtmp)[3]
     outdat[i,2] <- (-b1)/(2*b2) 
-    outdat[i,3]<-predict(modtmp, data.frame(Nfert=outdat[i,2], location=NA, seedyld=NA), level=0)
+    outdat[i,3]<-predict(modtmp, data.frame(Nfert2=outdat[i,2], location=NA, seedyld=NA), level=0)
   }
   print(data.frame("AONR"=mean(outdat$AONR), "LowAONR"=quantile(outdat$AONR, 0.025), "UpAONR"=quantile(outdat$AONR, 0.975),
                    "EstYld"=mean(outdat$EstYld), "LowEstYld"=quantile(outdat$EstYld, 0.025), "UpEstYld"=quantile(outdat$EstYld, 0.975)))
