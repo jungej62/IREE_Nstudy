@@ -9,7 +9,7 @@ eonr.out<-function(mod, yldat, simnum, price){ #mod is model, yldat is the name 
     b2<-fixef(modtmp)[3]
     outdat[i,2] <- ((1.14/(price*2.204))-b1)/(2*b2) #for EONR, input price in dollars per pound
     #outdat[i,2] <- (-b1)/(2*b2) for AONR
-outdat[i,3]<-predict(modtmp, data.frame(Nfert=outdat[i,2], location=NA, seedyld=NA), level=0)
+outdat[i,3]<-predict(modtmp, data.frame(Nfertnew=outdat[i,2], location=NA, seedyld=NA), level=0)
   }
 print(data.frame("AONR"=mean(outdat$AONR), "LowAONR"=quantile(outdat$AONR, 0.025), "UpAONR"=quantile(outdat$AONR, 0.975),
                  "EstYld"=mean(outdat$EstYld), "LowEstYld"=quantile(outdat$EstYld, 0.025), "UpEstYld"=quantile(outdat$EstYld, 0.975)))
@@ -25,14 +25,13 @@ aonr.out<-function(mod, yldat, simnum){ #mod is model, yldat is the name of data
     b1<-fixef(modtmp)[2]
     b2<-fixef(modtmp)[3]
     outdat[i,2] <- (-b1)/(2*b2) 
-    outdat[i,3]<-predict(modtmp, data.frame(Nfert2=outdat[i,2], location=NA, seedyld=NA), level=0)
+    outdat[i,3]<-predict(modtmp, data.frame(Nfertnew=outdat[i,2], location=NA, seedyld=NA), level=0)
   }
   print(data.frame("AONR"=mean(outdat$AONR), "LowAONR"=quantile(outdat$AONR, 0.025), "UpAONR"=quantile(outdat$AONR, 0.975),
                    "EstYld"=mean(outdat$EstYld), "LowEstYld"=quantile(outdat$EstYld, 0.025), "UpEstYld"=quantile(outdat$EstYld, 0.975)))
 }
 
 aonr.out(tlidat13_mod2, tlidat13, 100)
-
 
 
 #Here is the function to produce quadratic plateau models
