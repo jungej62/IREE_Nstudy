@@ -45,3 +45,6 @@ linplat<-function(x, alpha, beta, gamma){
          alpha+beta*gamma)
 }
 
+qmmod<-function(x, alpha, beta, gamma){
+  alpha - ((2*gamma*beta)*x)+(beta*x^2)
+}

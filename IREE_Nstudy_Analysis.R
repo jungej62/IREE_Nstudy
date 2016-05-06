@@ -110,3 +110,46 @@ sem.model.fits(tlidatny3_mod1)
 tlidatny3_mod2<-lme(seedyld~Nfertnew+I(Nfertnew^2), random=~1|location/rep, data=tlidatny3, na.action=na.omit)
 anova(tlidatny3_mod2)
 sem.model.fits(tlidatny3_mod2)
+##################################################
+#Re-parametarized quadratic for AONR estimation with no random effect.
+tlidatny2_mod3<-nls(seedyld ~ alpha - ((2*gamma*beta)*Nfertnew)+(beta*Nfertnew^2), data=tlidatny2, 
+                    start = list(alpha = 250, beta = -0.1, gamma = 100),
+                    control = list(maxiter=200))
+
+#Trying a nls with random effects. Should produce the same output as mod3. Just uses function call.
+tlidatny2_mod4<-nls(seedyld ~ qmmod(Nfertnew, alpha, beta, gamma),
+                    data=tlidatny2,
+                    start=list(alpha=600, beta=-0.1, gamma=100))
+summary(tlidatny2_mod4)
+#Trying nlme's auto fitter. This works and produces a unique result
+tlidatny2_mod5<-nls(seedyld ~ SSasymp(Nfertnew, Asym, R0, lrc),
+                    data=tlidatny2)
+summary(tlidatny2_mod5)
+#grouping data to use mixed effects model for accounting random effects.
+data1<-tlidatny2[,c(2,3,11,12)]
+data1<-groupedData(seedyld~Nfertnew|location/plot, data=data1,
+                   labels=list(x='Nitrogen rate', y="Grain yield"),
+                   units=list(x="(kg2/ha)", y="(kg2/ha)"))
+#Rearranged quadratic model with random effects
+tlidatny2_mod6<-nlme(seedyld ~ qmmod(Nfertnew, alpha, beta, gamma),
+                     data=data1,
+                     fixed=alpha+beta+gamma~1,
+                     random=alpha~1|location,
+                     start=c(alpha=700, beta=-0.01, gamma=100),
+                     na.action=na.omit)
+summary(tlidatny2_mod6)
+
+#Comparing mod4 and mod6 shows effect of accounting for random effects. 
+#Comparing models with AIC shows that random effects matter.
+
+#Quadratic plateau model with random effects                
+tlidatny2_mod8<-nlme(seedyld ~ qpmod(Nfertnew, alpha, beta, gamma),
+                     data=data1,
+                     fixed=alpha+beta+gamma~1,
+                     random=alpha~1|location,
+                     start=c(alpha=700, beta=-0.01, gamma=100),
+                     na.action=na.omit)
+summary(tlidatny2_mod8)
+#The quadratic plateau estimates a much smaller AONR. We should compare SE of estimates to see if they overlap with quadratic. 
+anova(tlidatny2_mod6, tlidatny2_mod8)
+
